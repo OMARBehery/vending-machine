@@ -1,14 +1,34 @@
 const Product = require("../models/Products");
-
 const User = require("../models/User");
 const jwt = require('jsonwebtoken');
 
 
 
+
+// console.log(currentUser);
 //checkrole
 
-const checkRole=(id)=>{
-const token =req.cookie.jwt;
+const currentUser = async(token)=>{
+  let returnedToken = ""
+  if(token){
+      jwt.verify(token, 'my secret',  async (err, decodedToken) => {
+      if (err) {
+        console.log(err.message);
+        res.send('unauthorized');
+
+      } else {
+        console.log("decoded token >>>> " , decodedToken)
+        returnedToken = decodedToken
+  }
+})
+}
+  else{
+  res.send('unauthorized')
+}
+return returnedToken
+}
+
+const checkRole=(token)=>{
 if (token) {
   jwt.verify(token, 'my secret', (err, decodedToken) => {
     if (err) {
@@ -55,9 +75,13 @@ module.exports.singleproduct_get = (req, res) => {
 
 module.exports.product_post = async(req, res) => {
   const id = req.params.id;
-  const {sellerId}=req.body;
-  const seller =await checkRole(sellerId)
-  if(seller){
+  const token = req.cookies.jwt;
+  console.log(token);
+  const decodedToken =  await currentUser(token);
+  console.log("decoded token ", decodedToken)
+  const user =  await User.findById(decodedToken.id);
+  if(user && user.role === 'seller'){
+    req.body.sellerId = user._id
     const product = new Product(req.body);
     product.save()
       .then(result => {
@@ -72,7 +96,7 @@ module.exports.product_post = async(req, res) => {
 
 module.exports.product_put = async (req, res) => {
   const { sellerId , productName} = req.body;
-  const seller=await checkRole(sellerId);
+  const seller= checkRole(sellerId);
 if(seller){
   try {
     const product = await Product.findOneAndUpdate({sellerId, productName},req.body,{returnOriginal:false});

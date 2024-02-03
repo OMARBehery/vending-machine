@@ -5,6 +5,7 @@ const cookieParser = require('cookie-parser');
 const { requireAuth } = require('./middleware/authMiddleware');
 const productRoutes = require('./routes/productRoutes');
 const userActionsRoutes = require('./routes/userActionsRoutes');
+const redis = require('redis')
 const app = express();
 
 // middleware
@@ -17,10 +18,11 @@ app.use(cookieParser());
 
 // database connection
 const dbURI = 'mongodb+srv://omar:dbpass1234@cluster0.huymcu2.mongodb.net/node_course?retrywrites=true&w=majority';
-mongoose.connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex:true })
+mongoose.connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then((result) => app.listen(3000))
   .catch((err) => console.log(err));
 
+// redis.connect()  
 // routes
 app.get('/', (req, res) => res.send('home'));
 app.use(productRoutes);

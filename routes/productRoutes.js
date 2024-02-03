@@ -5,7 +5,7 @@ const router = Router();
 
 router.get('/getproducts',requireAuth, productController.allproduct_get);
 
-router.post('/productpost',requireAuth, productController.product_post);
+router.post('/create-product',requireAuth, productController.product_post);
 router.put('/productupdate',requireAuth, productController.product_put);
 router.delete('/:id',requireAuth, productController.product_delete);
 
